@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +23,8 @@
             text-align: center;
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             padding: 12px;
             margin-top: 8px;
@@ -41,6 +43,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>貯金を追加</h1>
@@ -51,8 +54,11 @@
 
             <label>口座</label>
             <select name="account">
-                <option>Main Bank</option>
-                <option>Cash</option>
+                {% for account in accounts %}
+                <option value="{{ account.id }}">
+                    {{ account.name }}
+                </option>
+                {% endfor %}
             </select>
 
             <label>メモ</label>
@@ -62,4 +68,5 @@
         </form>
     </div>
 </body>
+
 </html>
