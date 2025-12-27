@@ -9,7 +9,17 @@ cur.execute("""
 CREATE TABLE IF NOT EXISTS accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL
-)
+);
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS savings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    memo TEXT,
+    FOREIGN KEY(account_id) REFERENCES accounts(id)
+);
 """)
 
 # ==== 初期データ投入 ====
