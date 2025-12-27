@@ -1,16 +1,28 @@
 import sqlite3
 from pathlib import Path
 
-# DBパス
-db_path = Path(__file__).parent / "db" / "savelog.sqlite3"
+conn = sqlite3.connect("savelog.db")
+cur = conn.cursor()
 
-# schema.sqlを読み込む
-schema_path = Path(__file__).parent.parent / "schema.sql"
+# ==== テーブル作成 ====
+cur.execute("""
+CREATE TABLE IF NOT EXISTS accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+)
+""")
 
-conn = sqlite3.connect(db_path)
-with open(schema_path, "r", encoding="utf-8") as f:
-    conn.executescript(f.read())
+# ==== 初期データ投入 ====
+accounts = ["Main Bank", "Cash"]
 
+for name in accounts:
+    cur.execute(
+        "INSERT INTO accounts (name) VALUES (?)",
+        (name,)
+    )
+
+
+conn.commit()
 conn.close()
 
-print("SaveLog DB initialized")
+print("DB初期化完了")
