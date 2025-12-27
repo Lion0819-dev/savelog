@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveLog - 追加</title>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system;
+            background: #f5f5f5;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0, auto;
+            padding: 16px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 24px;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #007aff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>貯金を追加</h1>
+
+        <form method="post" accept="/add">
+            <label>金額（円）</label>
+            <input type="number" name="amount" required>
+
+            <label>口座</label>
+            <select name="account">
+                <option>Main Bank</option>
+                <option>Cash</option>
+            </select>
+
+            <label>メモ</label>
+            <input type="text" name="memo">
+
+            <button type="submit">追加する</button>
+        </form>
+    </div>
+</body>
+</html>
