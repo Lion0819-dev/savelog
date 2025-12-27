@@ -1,20 +1,76 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SaveLog</title>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont;
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+
+        .account {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin: 24px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #007aff;
+            color: white;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>SaveLog</h1>
+    <div class="container">
+        <h1>SaveLog</h1>
+        <div class="account">
+            <div>Main Bank</div>
+            <div>150,000円</div>
+        </div>
 
-    <h2>口座一覧</h2>
-    <ul>
-        <li>Main Bank: 150,000円</li>
-        <li>Cash: 30,000円</li>
-    </ul>
+        <div class="account">
+            <div>Cash</div>
+            <div>30,000円</div>
+        </div>
 
+        <div class="total">
+            合計：180,000円
+        </div>
 
-    <a href="add.html">貯金を追加</a>
+    </div>
+
+    <button onclick="location.href='/add'">貯金を追加</button>
+
 </body>
+
 </html>
