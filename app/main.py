@@ -1,4 +1,5 @@
 import os
+from datetime import date
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for
 
@@ -52,10 +53,12 @@ def add():
     if request.method == "POST":
         account_id = request.form["account_id"]
         amount = request.form["amount"]
+        saved_date = date.today().isoformat()
+        memo = request.form["memo"]
 
         cur.execute(
-            "INSERT INTO savings (account_id, amount) VALUES (?, ?)",
-            (account_id, amount)
+            "INSERT INTO savings (account_id, amount,memo, saved_date) VALUES (?, ?, ?, ?)",
+            (account_id, amount, memo, saved_date)
         )
         conn.commit()
         conn.close()
