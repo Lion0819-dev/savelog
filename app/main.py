@@ -116,7 +116,7 @@ def add():
     accounts = cur.fetchall()
 
     if request.method == "POST":
-        account_id = request.form["account"]
+        account_id = request.form["account_id"]
         amount = request.form["amount"]
         memo = request.form.get("memo", "")
 
@@ -131,6 +131,23 @@ def add():
 
     conn.close()
     return render_template("add.html", accounts=accounts)
+
+@app.route("/details")
+def details():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    SELECT s.id, s.amount, s.memo, s.saved_date, a.name AS account_name
+    FROM savings s
+    JOIN accounts a ON s.account_id = a.id
+    ORDER BY s.saved_date DESC
+    """)
+
+    details = cur.fetchall()
+    conn.close()
+
+    return render_template("details.html", details=details)
 
 
 if __name__ == "__main__":
