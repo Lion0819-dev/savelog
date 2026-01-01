@@ -9,33 +9,30 @@
     <style>
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont;
-            margin: 0;
             background: #f5f5f5;
-        }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
+            margin: 0;
             padding: 16px;
         }
 
-        h1 {
-            text-align: center;
-        }
-
-
-        .account {
+        table {
+            width: 100%;
+            border-collapse: collapse;
             background: white;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 8px;
         }
 
-        .total {
-            font-size: 20px;
+        th, td{
+            padding: 12px;
+            border-bottom: 1px, solid, #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        .amount {
+            text-align: right;
             font-weight: bold;
-            text-align: center;
-            margin: 24px 0;
         }
 
         button {
@@ -51,23 +48,34 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>SaveLog</h1>
-        <div class="account">
-            <div>Main Bank</div>
-            <div>150,000円</div>
-        </div>
+    <h1>口座一覧</h1>
 
-        <div class="account">
-            <div>Cash</div>
-            <div>30,000円</div>
+    <!-- 全口座の合計 -->
+    <div class="total-box">
+        <div class="label">全口座の残高</div>
+        <div class="amount">
+            {{ "{:,}".format(grand_total) }}
         </div>
-
-        <div class="total">
-            合計：180,000円
-        </div>
-
     </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>口座</th>
+                <th>金額</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>{{ account.name }}</td>
+                <td class="amount">
+                    {{ "{:,}".format(account.total) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <button onclick="location.href='/add'">貯金を追加</button>
 

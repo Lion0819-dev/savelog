@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -20,12 +20,47 @@ def get_accounts():
 
 @app.route("/")
 def accounts():
-    accounts = get_accounts()
-    return render_template("index.html", accounts=accounts)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
 
-@app.route("/add")
+
+    cur.execute("""
+        SELECT a.id, a.name, COALESCE(SUM(s.amount), 0) AS total
+        FROM accounts a
+        LEFT JOIN savings s
+        ON a.id = s.account_id
+        GROUP BY a.id, a.name
+        ORDER BY a.id
+        """)
+    accounts = cur.fetchall()
+
+    grand_total = sum(account["total"] for account in accounts)
+
+    conn.close()
+    return render_template("index.html", accounts=accounts, grand_total=grand_total)
+
+@app.route("/add", methods=["GET", "POST"])
 def add():
-    return render_template("add.html")
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    accounts = get_accounts()
+
+    if request.method == "POST":
+        account_id = request.form["account_id"]
+        amount = request.form["amount"]
+
+        cur.execute(
+            "INSERT INTO savings (account_id, amount) VALUES (?, ?)",
+            (account_id, amount)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for("accounts"))
+
+    conn.close()
+    return render_template("add.html", accounts=accounts)
 
 if __name__ == "__main__":
     # iPhoneからも見られるように
