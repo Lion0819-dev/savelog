@@ -5,29 +5,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>明細</title>
+    <style>
+        .negative {
+            color: red;
+        }
+
+        .filters {
+            margin-bottom: 12px;
+        }
+
+        .filters {
+            margin: 4px 4px 4px 0;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: #f5f5f5;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .filters button.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+    </style>
 </head>
 
 <body>
     <h1>明細</h1>
 
-    <table border="1" width="100%">
-        <tr>
-
-            <th>日付</th>
-            <th>口座</th>
-            <th>金額</th>
-            <th>メモ</th>
-        </tr>
-
-        {% for d in details %}
-        <tr>
-            <th>{{ d.created_at }}</th>
-            <td>{{ d.account_name }}</td>
-            <td>{{ "{:,}".format(d.amount) }}</td>
-            <td>{{ d.memo }}</td>
-        </tr>
+    <div class="filters" data-group="account">
+        {% for name in account_names %}
+        <button class="account-btn" data-name="{{ name }}" onclick="filterAccount('{{ name }}', this)">{{ name }}</button>
         {% endfor %}
+    </div>
+    <div class="filters" data-group="amount">
+        <button class="amount-btn" onclick="filterAmount('plus', this)">収入</button>
+        <button class="amount-btn" onclick="filterAmount('minus', this)">支出</button>
+
+    </div>
+
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th>日付</th>
+                <th>口座</th>
+                <th>金額</th>
+                <th>メモ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in details %}
+            <tr class="detail-row" data-account="{{ d['account_name'] }}" data-amount="{{ d['amount'] }}">
+                <td>{{ d['saved_date'] }}</td>
+                <td>{{ d['account_name'] }}</td>
+                <td class="{% if d['amount'] < 0 %}negative{% endif %}">
+                    {{ "{:,}".format(d['amount']) }}
+                </td>
+                <td>{{ d['memo'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
     </table>
+
+    <script>
+        let selectedAccounts = new Set();
+        let selectedAmounts = new Set(["plus", "minus"]); // 初期は全ON
+
+        /* 初期化：口座は全部ON */
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".account-btn").forEach(btn => {
+                btn.classList.add("active");
+                selectedAccounts.add(btn.dataset.name);
+            });
+
+            document.querySelectorAll(".amount-btn").forEach(btn => {
+                btn.classList.add("active");
+            });
+        });
+
+        /* 共通フィルタ */
+        function applyFilters() {
+            document.querySelectorAll(".detail-row").forEach(row => {
+                const account = row.dataset.account;
+                const amount = Number(row.dataset.amount);
+
+                const matchAccount = selectedAccounts.has(account);
+                const matchAmount =
+                    (selectedAmounts.has("plus") && amount > 0) ||
+                    (selectedAmounts.has("minus") && amount < 0);
+
+                row.style.display =
+                    (matchAccount && matchAmount) ? "" : "none";
+            });
+        }
+
+        /* 口座スライサー */
+        function filterAccount(name, btn) {
+            if (selectedAccounts.size === 1 && selectedAccounts.has(name)) {
+                return; // 最後の1つはOFFにさせない
+            }
+
+            if (selectedAccounts.has(name)) {
+                selectedAccounts.delete(name);
+                btn.classList.remove("active");
+            } else {
+                selectedAccounts.add(name);
+                btn.classList.add("active");
+            }
+
+            applyFilters();
+        }
+
+        /* 金額スライサー */
+        function filterAmount(type, btn) {
+            if (selectedAmounts.size === 1 && selectedAmounts.has(type)) {
+                return; // 最後の1つはOFF不可
+            }
+
+            if (selectedAmounts.has(type)) {
+                selectedAmounts.delete(type);
+                btn.classList.remove("active");
+            } else {
+                selectedAmounts.add(type);
+                btn.classList.add("active");
+            }
+
+            applyFilters();
+        }
+    </script>
+    `
+
+
+
+
 </body>
 
 </html>
