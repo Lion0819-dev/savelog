@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
@@ -120,10 +121,12 @@ def add():
         amount = request.form["amount"]
         memo = request.form.get("memo", "")
 
+        saved_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+
         cur.execute("""
             INSERT INTO savings (account_id, amount, memo, saved_date)
-            VALUES (?, ?, ?, DATE('now'))
-        """, (account_id, amount, memo))
+            VALUES (?, ?, ?, ?)
+        """, (account_id, amount, memo, saved_date))
 
         conn.commit()
         conn.close()
@@ -145,9 +148,14 @@ def details():
     """)
 
     details = cur.fetchall()
+
+    months = sorted({d["saved_date"][:7] for d in details}, reverse=True)
+
+    account_names = sorted(set(d["account_name"] for d in details))
+
     conn.close()
 
-    return render_template("details.html", details=details)
+    return render_template("details.html", details=details, months=months, account_names=account_names)
 
 
 if __name__ == "__main__":
