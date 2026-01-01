@@ -1,179 +1,143 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaveLog</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveLog - 口座管理</title>
 
-<style>
-body {
-    font-family: system-ui, -apple-system;
-    margin: 0;
-    background: #f5f5f5;
-}
+    <style>
+        body {
+            font-family: system-ui, -apple-system;
+            background: #f5f5f5;
+            margin: 0;
+        }
 
-/* ===== ヘッダー ===== */
-.header {
-    position: sticky;
-    top: 0;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-    background: #f9f9f9;
-    border-bottom: 0.5px solid #ccc;
-}
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
 
-.menu-btn {
-    font-size: 22px;
-    background: none;
-    border: none;
-    padding: 0;
-}
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
 
-h1 {
-    flex: 1;
-    text-align: center;
-    font-size: 17px;
-    font-weight: 600;
-    margin: 0;
-}
+        .total {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
 
-/* ===== スライドメニュー ===== */
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.3);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
-.overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
 
-.menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 260px;
-    height: 100%;
-    background: #fff;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.2);
-}
+        th {
+            background: #eee;
+        }
 
-.menu.show {
-    transform: translateX(0);
-}
+        .amount {
+            text-align: right;
+        }
 
-.menu a {
-    display: block;
-    padding: 16px;
-    text-decoration: none;
-    color: #333;
-    border-bottom: 1px solid #eee;
-}
+        .delete-btn {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
 
-/* ===== コンテンツ ===== */
-.container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 16px;
-}
+        .add-account {
+            margin-top: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+        }
 
-table {
-    width: 100%;
-    background: #fff;
-    border-collapse: collapse;
-}
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-top: 8px;
+        }
 
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-}
-
-.amount {
-    text-align: right;
-    font-weight: bold;
-}
-
-.add-btn {
-    margin-top: 16px;
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    background: #007aff;
-    color: white;
-}
-</style>
+        button {
+            margin-top: 16px;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #007aff;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="container">
+        <h1>口座管理</h1>
 
-<header class="header">
-    <button class="menu-btn" onclick="openMenu()">☰</button>
-    <h1>SaveLog</h1>
-</header>
+        <!-- 全口座の合計 -->
+        <div class="total">
+            合計残高：{{ total_amount_str }} 円
+        </div>
 
-<div id="overlay" class="overlay" onclick="closeMenu()"></div>
+        <!-- 口座一覧 -->
+        <table>
+            <thead>
+                <tr>
+                    <th>口座名</th>
+                    <th class="amount">残高</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td>{{ account.name }}</td>
+                    <td class="amount">
+                        {{ account.balance_str }} 円
+                    </td>
+                    <td>
+                        {% if account.balance == 0 %}
+                        <form action="{{ url_for('delete_account', account_id=account.id) }}" method="post">
+                            <button class="delete-btn" type="submit">削除</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-<nav id="menu" class="menu">
-    <a href="/">口座一覧</a>
-    <a href="/add">貯金を追加</a>
-    <a href="/details">明細</a>
-</nav>
-
-<div class="container">
-    <table>
-        <thead>
-            <tr>
-                <th>口座</th>
-                <th class="amount">残高</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for account in accounts %}
-            <tr>
-                <td>{{ account.name }}</td>
-                <td class="amount">
-                    {{ "{:,}".format(account.total or 0) }} 
-                </td>
-            </tr>
-            {% endfor %}
-            <tr>
-                <th>合計</th>
-                <th class="amount">
-                    {{ "{:,}".format(grand_total) }}
-                </th>
-            </tr>
-        </tbody>
-    </table>
-
-    <button class="add-btn" onclick="location.href='/add'">
-        貯金を追加
-    </button>
-</div>
-
-<script>
-function openMenu() {
-    document.getElementById("menu").classList.add("show");
-    document.getElementById("overlay").classList.add("show");
-}
-
-function closeMenu() {
-    document.getElementById("menu").classList.remove("show");
-    document.getElementById("overlay").classList.remove("show");
-}
-</script>
-
+        <!-- 口座追加 -->
+        <div class="add-account">
+            <h2>口座を追加</h2>
+            <form action="{{ url_for('add_account') }}" method="post">
+                <input type="text" name="name" placeholder="口座名" required>
+                <button type="submit">追加する</button>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
