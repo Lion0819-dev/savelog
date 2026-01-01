@@ -1,9 +1,11 @@
+import os
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-DB_PATH = "savelog.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "db", "savelog.sqlite3")
 
 # DB接続用（口座一覧取得）
 def get_accounts():
@@ -61,6 +63,28 @@ def add():
 
     conn.close()
     return render_template("add.html", accounts=accounts)
+
+@app.route("/details")
+def details():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # 確認用
+    cur.execute("""PRAGMA table_info(savings)""")
+    print(cur.fetchall())
+
+    cur.execute("""
+    SELECT s.id, s.amount, s.memo, s.created_at, a.name AS account_name
+    FROM savings s
+    JOIN accounts a
+    ON s.account_id = a.id
+    ORDER BY s.created_at DESC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+
+    return render_template("details.html", details=rows)
 
 if __name__ == "__main__":
     # iPhoneからも見られるように

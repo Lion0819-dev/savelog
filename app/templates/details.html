@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明細</title>
+</head>
+
+<body>
+    <h1>明細</h1>
+
+    <table border="1" width="100%">
+        <tr>
+
+            <th>日付</th>
+            <th>口座</th>
+            <th>金額</th>
+            <th>メモ</th>
+        </tr>
+
+        {% for d in details %}
+        <tr>
+            <th>{{ d.created_at }}</th>
+            <td>{{ d.account_name }}</td>
+            <td>{{ "{:,}".format(d.amount) }}</td>
+            <td>{{ d.memo }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>
