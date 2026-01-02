@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveLog - 口座管理</title>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system;
+            background: #f5f5f5;
+            margin: 0;
+        }
+
+
+        #menu-toggle {
+            display: none;
+        }
+
+        .menu-icon {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .hamburger {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            font-size: 28px;
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -260px;
+            width: 260px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            transition: left 0.3s ease;
+            z-index: 999;
+            /* padding: 16px; */
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .side-menu li a {
+            display: block;
+            padding: 14px 8px;
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            border-radius: 6px;
+        }
+
+        .sidse-menu li a:active {
+            background: #f0f0f0;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 998;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .total {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        .amount {
+            text-align: right;
+        }
+
+        .delete-btn {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .add-account {
+            margin-top: 24px;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        button {
+            margin-top: 16px;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #007aff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>口座管理</h1>
+
+        <input type="checkbox" id="menu-toggle">
+
+        <div class="hamburger" id="hamburger">☰</div>
+
+        <nav class="side-menu" id="sideMenu">
+            <button class="close-btn" id="closeBtn">×</button>
+            <ul>
+                <li><a href="/">口座管理</a></li>
+                <li><a href="/add">貯金を追加</a></li>
+                <li><a href="/details">明細を見る</a></li>
+            </ul>
+        </nav>
+
+        <div class="overlay" id="overlay"></div>
+
+        <!-- 全口座の合計 -->
+        <div class="total">
+            合計残高：{{ total_amount_str }} 円
+        </div>
+
+        <!-- 口座一覧 -->
+        <table>
+            <thead>
+                <tr>
+                    <th>口座名</th>
+                    <th class="amount">残高</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td>{{ account.name }}</td>
+                    <td class="amount">
+                        {{ account.balance_str }} 円
+                    </td>
+                    <td>
+                        {% if account.balance == 0 %}
+                        <form action="{{ url_for('delete_account', account_id=account.id) }}" method="post">
+                            <button class="delete-btn" type="submit">削除</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 口座追加 -->
+        <div class="add-account">
+            <h2>口座を追加</h2>
+            <form action="{{ url_for('add_account') }}" method="post">
+                <input type="text" name="name" placeholder="口座名" required>
+                <button type="submit">追加する</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const hamburger = document.getElementById("hamburger");
+            const menu = document.getElementById("sideMenu");
+            const overlay = document.getElementById("overlay");
+            const closeBtn = document.getElementById("closeBtn");
+
+            function toggleMenu() {
+                const isOpen = menu.classList.toggle("open");
+                overlay.classList.toggle("show", isOpen);
+                hamburger.style.display = isOpen ? "none" : "block";
+            }
+
+            hamburger.addEventListener("click", toggleMenu);
+            overlay.addEventListener("click", toggleMenu);
+            closeBtn.addEventListener("click", toggleMenu);
+        });
+    </script>
+
+
+</body>
+
+</html>
