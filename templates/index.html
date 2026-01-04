@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}口座管理{% endblock %}
+
+{% block header %}口座管理{% endblock %}
+
+{% block head_extra %}
+<style>
+    .total {
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 24px;
+    }
+
+    .amount {
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <!-- 全口座の合計 -->
+    <div class="total">
+        合計残高：{{ total_amount_str }} 円
+    </div>
+
+    <!-- 口座一覧 -->
+    <table>
+        <thead>
+            <tr>
+                <th>口座名</th>
+                <th class="amount">残高</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>{{ account.name }}</td>
+                <td class="amount">
+                    {{ account.balance_str }} 円
+                </td>
+                <td>
+                    {% if account.balance == 0 %}
+                    <form action="{{ url_for('delete_account', account_id=account.id) }}" method="post">
+                        <button class="delete-btn" type="submit">削除</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 口座追加 -->
+    <div class="add-account">
+        <h2>口座を追加</h2>
+        <form action="{{ url_for('add_account') }}" method="post">
+            <input type="text" name="name" placeholder="口座名" required>
+            <button type="submit">追加する</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
