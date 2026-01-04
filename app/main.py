@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
+app.secret_key = "secretk_key"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "db", "savelog.sqlite3")
@@ -157,6 +158,69 @@ def details():
 
     return render_template("details.html", details=details, months=months, account_names=account_names)
 
+@app.route("/transfer", methods=["GET", "POST"])
+def transfer():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id, name FROM accounts")
+    accounts = cur.fetchall()
+
+    if request.method == "POST":
+        from_id = request.form["from_account"]
+        to_id = request.form["to_account"]
+        amount = int(request.form["amount"])
+        memo = request.form["memo"]
+
+        # 入力チェック
+        if not from_id or not to_id or not amount:
+            conn.close()
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                message="未入力の項目があります",
+                category="error"
+            )
+
+        if from_id == to_id:
+            conn.close()
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                message="同じ口座には振替できません",
+                category="error"
+            )
+        
+        if amount <= 0:
+            conn.close()
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                message="金額は正の数を入力してください",
+                category="error"
+            )
+        
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        # 出金
+        cur.execute("""
+            INSERT INTO savings (account_id, amount, memo, saved_date)
+            VALUES (?, ?, ?, ?)         
+        """, (from_id, -amount, f"振替 → {memo}", now))
+
+        # 入金
+        cur.execute("""
+            INSERT INTO savings (account_id, amount, memo, saved_date)
+            VALUES (?, ?, ?, ?)         
+        """, (to_id, amount, f"振替 ← {memo}", now))
+
+        conn.commit()
+        conn.close()
+
+        return redirect("/")
+    
+    conn.close()
+    return render_template("transfer.html", accounts=accounts)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
