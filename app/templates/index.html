@@ -1,131 +1,70 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaveLog - 口座管理</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% block title %}口座管理{% endblock %}
 
-    <style>
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 16px;
-        }
+{% block header %}口座管理{% endblock %}
 
-        .total {
-            background: white;
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 24px;
-        }
+{% block head_extra %}
+<style>
+    .total {
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 24px;
+    }
 
-        .amount {
-            text-align: right;
-        }
+    .amount {
+        text-align: right;
+    }
+</style>
+{% endblock %}
 
-        .delete-btn {
-            background: #ff3b30;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+{% block content %}
 
-        .add-account {
-            margin-top: 24px;
-            background: white;
-            padding: 18px;
-            border-radius: 8px;
-        }
-
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>口座管理</h1>
-
-        <div class="hamburger" id="hamburger">☰</div>
-
-        <nav class="side-menu" id="sideMenu">
-            <ul>
-                <li><a href="/">口座管理</a></li>
-                <li><a href="/add">貯金を追加</a></li>
-                <li><a href="/transfer">振替</a></li>
-                <li><a href="/details">明細を見る</a></li>
-            </ul>
-        </nav>
-
-        <div class="overlay" id="overlay"></div>
-
-        <!-- 全口座の合計 -->
-        <div class="total">
-            合計残高：{{ total_amount_str }} 円
-        </div>
-
-        <!-- 口座一覧 -->
-        <table>
-            <thead>
-                <tr>
-                    <th>口座名</th>
-                    <th class="amount">残高</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for account in accounts %}
-                <tr>
-                    <td>{{ account.name }}</td>
-                    <td class="amount">
-                        {{ account.balance_str }} 円
-                    </td>
-                    <td>
-                        {% if account.balance == 0 %}
-                        <form action="{{ url_for('delete_account', account_id=account.id) }}" method="post">
-                            <button class="delete-btn" type="submit">削除</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- 口座追加 -->
-        <div class="add-account">
-            <h2>口座を追加</h2>
-            <form action="{{ url_for('add_account') }}" method="post">
-                <input type="text" name="name" placeholder="口座名" required>
-                <button type="submit">追加する</button>
-            </form>
-        </div>
+<div class="container">
+    <!-- 全口座の合計 -->
+    <div class="total">
+        合計残高：{{ total_amount_str }} 円
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const hamburger = document.getElementById("hamburger");
-            const menu = document.getElementById("sideMenu");
-            const overlay = document.getElementById("overlay");
-            const closeBtn = document.getElementById("closeBtn");
+    <!-- 口座一覧 -->
+    <table>
+        <thead>
+            <tr>
+                <th>口座名</th>
+                <th class="amount">残高</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>{{ account.name }}</td>
+                <td class="amount">
+                    {{ account.balance_str }} 円
+                </td>
+                <td>
+                    {% if account.balance == 0 %}
+                    <form action="{{ url_for('delete_account', account_id=account.id) }}" method="post">
+                        <button class="delete-btn" type="submit">削除</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-            function toggleMenu() {
-                const isOpen = menu.classList.toggle("open");
-                overlay.classList.toggle("show", isOpen);
-                hamburger.style.display = isOpen ? "none" : "block";
-            }
+    <!-- 口座追加 -->
+    <div class="add-account">
+        <h2>口座を追加</h2>
+        <form action="{{ url_for('add_account') }}" method="post">
+            <input type="text" name="name" placeholder="口座名" required>
+            <button type="submit">追加する</button>
+        </form>
+    </div>
+</div>
 
-            hamburger.addEventListener("click", toggleMenu);
-            overlay.addEventListener("click", toggleMenu);
-            closeBtn.addEventListener("click", toggleMenu);
-        });
-    </script>
-
-
-</body>
-
-</html>
+{% endblock %}

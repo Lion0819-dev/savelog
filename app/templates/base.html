@@ -5,118 +5,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SaveLog{% endblock %}</title>
-
-    <style>
-        /* ここに共通CSSを入れる */
-        body {
-            font-family: system-ui, -apple-system;
-            background: #f5f5f5;
-            margin: 0;
-        }
-
-        /* ハンバーガーメニュー用 */
-        .hamburger {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            font-size: 28px;
-            z-index: 1000;
-            cursor: pointer;
-        }
-
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -260px;
-            width: 260px;
-            height: 100%;
-            background: #fff;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-            transition: left 0.3s ease;
-            z-index: 999;
-        }
-
-        .side-menu.open {
-            left: 0;
-        }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.3);
-            display: none;
-            z-index: 998;
-        }
-
-        .overlay.show {
-            display: block;
-        }
-
-        /* メニューリスト */
-        .side-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .side-menu li {
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-            font-size: 16px;
-        }
-
-        .side-menu li a {
-            display: block;
-            padding: 14px 8px;
-            text-decoration: none;
-            color: #333;
-            border-radius: 6px;
-        }
-    </style>
-
-    {% block head %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='toast.css') }}">
+    {% block head_extra %}{% endblock %}
 </head>
 
 <body>
-    <!-- ハンバーガー -->
-    <div class="hamburger" id="hamburger">☰</div>
+    <header>
+        <h1>{% block header %}{% endblock %}</h1>
 
-    <nav class="side-menu" id="sideMenu">
-        <button class="close-btn" id="closeBtn">×</button>
-        <ul>
-            <li><a href="/">口座管理</a></li>
-            <li><a href="/add">貯金を追加</a></li>
-            <li><a href="/details">明細を見る</a></li>
-            <li><a href="/transfer">振替</a></li>
-        </ul>
-    </nav>
+        <!-- ハンバーガーメニュー -->
+        <div class="hamburger" id="hamburger">☰</div>
 
-    <div class="overlay" id="overlay"></div>
+        <nav class="side-menu" id="sideMenu">
+            <ul>
+                <li><a href="/">口座管理</a></li>
+                <li><a href="/add">貯金を追加</a></li>
+                <li><a href="/transfer">振替</a></li>
+                <li><a href="/details">明細を見る</a></li>
+            </ul>
+        </nav>
 
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
+        <div class="overlay" id="overlay"></div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const hamburger = document.getElementById("hamburger");
-            const menu = document.getElementById("sideMenu");
-            const overlay = document.getElementById("overlay");
-            const closeBtn = document.getElementById("closeBtn");
+        <!-- メインコンテンツ -->
+        <main>
+            {% block content %}{% endblock %}
+        </main>
 
-            function toggleMenu() {
-                const isOpen = menu.classList.toggle("open");
-                overlay.classList.toggle("show", isOpen);
-                hamburger.style.display = isOpen ? "none" : "block";
-            }
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const hamburger = document.getElementById("hamburger");
+                const menu = document.getElementById("sideMenu");
+                const overlay = document.getElementById("overlay");
+                const closeBtn = document.getElementById("closeBtn");
 
-            hamburger.addEventListener("click", toggleMenu);
-            overlay.addEventListener("click", toggleMenu);
-            closeBtn.addEventListener("click", toggleMenu);
-        });
-    </script>
+                function toggleMenu() {
+                    const isOpen = menu.classList.toggle("open");
+                    overlay.classList.toggle("show", isOpen);
+                    hamburger.style.display = isOpen ? "none" : "block";
+                }
 
-    {% block scripts %}{% endblock %}
+                hamburger.addEventListener("click", toggleMenu);
+                overlay.addEventListener("click", toggleMenu);
+                closeBtn.addEventListener("click", toggleMenu);
+            });
+        </script>
+
+        <script src="{{ url_for('static', filename='toast.js') }}"></script>
+
+    </header>
 </body>
 
 </html>
