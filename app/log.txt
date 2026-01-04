@@ -1,0 +1,22 @@
+フォルダー パスの一覧:  ボリューム Windows
+ボリューム シリアル番号は 1298-E35C です
+C:.
+|   .gitignore
+|   check_db.py
+|   init_db.py
+|   log.txt
+|   main.py
+|   test_db.py
+|   
++---db
+|       savelog.sqlite3
+|       
++---static
++---templates
+|       add.html
+|       details.html
+|       index.html
+|       
+\---__pycache__
+        main.cpython-310.pyc
+        
