@@ -170,8 +170,6 @@ def transfer():
         from_id = request.form["from_account"]
         to_id = request.form["to_account"]
         amount = int(request.form["amount"])
-        memo = request.form["memo"]
-
         # 入力チェック
         if not from_id or not to_id or not amount:
             conn.close()
@@ -200,19 +198,27 @@ def transfer():
                 category="error"
             )
         
+        # 口座名取得
+        cur.execute("SELECT name FROM accounts WHERE id = ?", (from_id,))
+        from_name = cur.fetchone()["name"]
+
+        cur.execute("SELECT name FROM accounts WHERE id = ?", (to_id,))
+        to_name = cur.fetchone()["name"]
+
+        memo = f"FROM {from_name} TO {to_name}"
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
         # 出金
         cur.execute("""
             INSERT INTO savings (account_id, amount, memo, saved_date)
             VALUES (?, ?, ?, ?)         
-        """, (from_id, -amount, f"振替 → {memo}", now))
+        """, (from_id, -amount, memo, now))
 
         # 入金
         cur.execute("""
             INSERT INTO savings (account_id, amount, memo, saved_date)
             VALUES (?, ?, ?, ?)         
-        """, (to_id, amount, f"振替 ← {memo}", now))
+        """, (to_id, amount, memo, now))
 
         conn.commit()
         conn.close()
