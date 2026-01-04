@@ -5,23 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>振替</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
     <style>
-        /* ===== 全体 ===== */
-        body {
-            font-family: system-ui, -apple-system;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 16px;
-        }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
         /* タイトル */
         h1 {
-            text-align: center;
             margin-bottom: 24px;
         }
 
@@ -40,38 +28,12 @@
             color: #555;
         }
 
-        /* 入力系 */
-        select,
-        input[type="number"],
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-
         /* ===== 振替の視覚強調 ===== */
         .transfer-arrow {
             text-align: center;
             font-size: 20px;
             margin: 12px 0;
             color: #007aff;
-        }
-
-        /* ボタン */
-        button {
-            margin-top: 24px;
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: #007aff;
-            color: #ffffff;
-            cursor: pointer;
         }
 
         button:hover {
@@ -88,7 +50,6 @@
             font-size: 14px;
         }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='toast.css') }}">
 </head>
 

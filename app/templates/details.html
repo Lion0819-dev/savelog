@@ -5,92 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>明細</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* 全体 */
-        body {
-            font-family: system-ui, -apple-system;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 16px;
-        }
-
-        /* タイトル */
-        h1 {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        /* ===== フィルターエリア ===== */
-        .filters {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
-        /* フィルターのグループ */
-        .filters>div {
-            margin-bottom: 8px;
-        }
-
-        /* ボタン共通 */
-        .filter-btn {
-            margin: 4px 4px 4px 0;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background: #fff;
-            color: #333;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        /* ON状態（Excelスライサー風） */
-        .filter-btn.active {
-            background: #007aff;
-            color: #fff;
-            border-color: #007aff;
-        }
-
-        /* ===== テーブル ===== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* ヘッダー固定 */
-        thead th {
-            position: sticky;
-            top: 0;
-            background: #eeeeee;
-            z-index: 1;
-        }
-
-        /* セル */
-        th,
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-        }
-
-        /* 金額列右寄せ */
-        td:nth-child(3) {
-            text-align: right;
-        }
-
-        /* マイナス金額 */
-        .negative {
-            color: red;
-            font-weight: bold;
-        }
-
-        /* 行ホバー */
-        tbody tr:hover {
-            background: #f0f8ff;
+        .month-filters button,
+        .account-filters button,
+        .amount-filters button {
+            margin-bottom: 4px;
         }
     </style>
 </head>
