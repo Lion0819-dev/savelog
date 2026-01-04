@@ -39,7 +39,6 @@ def accounts():
     rows = cur.fetchall()
     conn.close()
 
-    # 表示用データ整形（カンマ付き）
     accounts = []
     for r in rows:
         accounts.append({
@@ -86,7 +85,6 @@ def delete_account(account_id):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # 残高チェック
     cur.execute("""
         SELECT COALESCE(SUM(amount), 0)
         FROM savings
@@ -135,6 +133,7 @@ def add():
     conn.close()
     return render_template("add.html", accounts=accounts)
 
+
 @app.route("/details")
 def details():
     conn = get_db_connection()
@@ -148,17 +147,47 @@ def details():
     """)
 
     details = cur.fetchall()
-
-    months = sorted({d["saved_date"][:7] for d in details}, reverse=True)
-
-    account_names = sorted(set(d["account_name"] for d in details))
-
     conn.close()
 
-    return render_template("details.html", details=details, months=months, account_names=account_names)
+    return render_template("details.html", details=details)
+
+
+@app.route("/transfer", methods=["GET", "POST"])
+def transfer():
+    """
+    振替画面
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id, name FROM accounts")
+    accounts = cur.fetchall()
+
+    message = None
+    category = None
+
+    if request.method == "POST":
+        from_id = request.form["from_account"]
+        to_id = request.form["to_account"]
+        amount = int(request.form["amount"])
+
+        if from_id == to_id:
+            message = "振替元と振替先が同じです"
+            category = "error"
+        else:
+            # 振替処理
+            now = datetime.now().strftime("%Y-%m-%d %H:%M")
+            memo = f"FROM {next(a['name'] for a in accounts if str(a['id'])==from_id)} TO {next(a['name'] for a in accounts if str(a['id'])==to_id)}"
+
+            cur.execute("INSERT INTO savings (account_id, amount, memo, saved_date) VALUES (?, ?, ?, ?)", (from_id, -amount, memo, now))
+            cur.execute("INSERT INTO savings (account_id, amount, memo, saved_date) VALUES (?, ?, ?, ?)", (to_id, amount, memo, now))
+            conn.commit()
+            message = "振替完了"
+            category = "success"
+
+    conn.close()
+    return render_template("transfer.html", accounts=accounts, message=message, category=category)
 
 
 if __name__ == "__main__":
-    # app.run(host="0.0.0.0", port=5000, debug=True)
-    app.run(host="0.0.0.0", port=5000)
-
+    app.run(host="0.0.0.0", port=5000, debug=True)
