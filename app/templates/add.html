@@ -1,72 +1,38 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaveLog - 追加</title>
+{% block title %}貯金追加{% endblock %}
 
-    <style>
-        body {
-            font-family: system-ui, -apple-system;
-            background: #f5f5f5;
-            margin: 0;
-        }
+{% block head_extra %}
+<style>
+    .container {
+        max-width: 480px;
+        margin: 0, auto;
+        padding: 16px;
+    }
+</style>
+{% endblock %}
 
-        .container {
-            max-width: 480px;
-            margin: 0, auto;
-            padding: 16px;
-        }
+{% block content %}
+<div class="container">
+    <h1>貯金を追加</h1>
 
-        h1 {
-            text-align: center;
-        }
+    <form method="post" action="/add">
+        <label>金額（円）</label>
+        <input type="number" name="amount" required>
 
-        input,
-        select {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            font-size: 16px;
-        }
+        <label>口座</label>
+        <select name="account_id">
+            {% for account in accounts %}
+            <option value="{{ account.id }}">
+                {{ account.name }}
+            </option>
+            {% endfor %}
+        </select>
 
-        button {
-            margin-top: 24px;
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: #007aff;
-            color: white;
-        }
-    </style>
-</head>
+        <label>メモ</label>
+        <input type="text" name="memo">
 
-<body>
-    <div class="container">
-        <h1>貯金を追加</h1>
-
-        <form method="post" action="/add">
-            <label>金額（円）</label>
-            <input type="number" name="amount" required>
-
-            <label>口座</label>
-            <select name="account_id">
-                {% for account in accounts %}
-                <option value="{{ account.id }}">
-                    {{ account.name }}
-                </option>
-                {% endfor %}
-            </select>
-
-            <label>メモ</label>
-            <input type="text" name="memo">
-
-            <button type="submit">追加する</button>
-        </form>
-    </div>
-</body>
-
-</html>
+        <button type="submit">追加する</button>
+    </form>
+</div>
+{% endblock %}

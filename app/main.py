@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
+app.secret_key = "secretk_key"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "db", "savelog.sqlite3")
@@ -39,6 +40,7 @@ def accounts():
     rows = cur.fetchall()
     conn.close()
 
+    # 表示用データ整形（カンマ付き）
     accounts = []
     for r in rows:
         accounts.append({
@@ -85,6 +87,7 @@ def delete_account(account_id):
     conn = get_db_connection()
     cur = conn.cursor()
 
+    # 残高チェック
     cur.execute("""
         SELECT COALESCE(SUM(amount), 0)
         FROM savings
@@ -133,7 +136,6 @@ def add():
     conn.close()
     return render_template("add.html", accounts=accounts)
 
-
 @app.route("/details")
 def details():
     conn = get_db_connection()
@@ -147,47 +149,85 @@ def details():
     """)
 
     details = cur.fetchall()
+
+    months = sorted({d["saved_date"][:7] for d in details}, reverse=True)
+
+    account_names = sorted(set(d["account_name"] for d in details))
+
     conn.close()
 
-    return render_template("details.html", details=details)
-
+    return render_template("details.html", details=details, months=months, account_names=account_names)
 
 @app.route("/transfer", methods=["GET", "POST"])
 def transfer():
-    """
-    振替画面
-    """
     conn = get_db_connection()
     cur = conn.cursor()
 
     cur.execute("SELECT id, name FROM accounts")
     accounts = cur.fetchall()
 
-    message = None
-    category = None
-
     if request.method == "POST":
         from_id = request.form["from_account"]
         to_id = request.form["to_account"]
         amount = int(request.form["amount"])
+        # 入力チェック
+        if not from_id or not to_id or not amount:
+            conn.close()
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                message="未入力の項目があります",
+                category="error"
+            )
 
         if from_id == to_id:
-            message = "振替元と振替先が同じです"
-            category = "error"
-        else:
-            # 振替処理
-            now = datetime.now().strftime("%Y-%m-%d %H:%M")
-            memo = f"FROM {next(a['name'] for a in accounts if str(a['id'])==from_id)} TO {next(a['name'] for a in accounts if str(a['id'])==to_id)}"
+            conn.close()
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                message="同じ口座には振替できません",
+                category="error"
+            )
+        
+        if amount <= 0:
+            conn.close()
+            return render_template(
+                "transfer.html",
+                accounts=accounts,
+                message="金額は正の数を入力してください",
+                category="error"
+            )
+        
+        # 口座名取得
+        cur.execute("SELECT name FROM accounts WHERE id = ?", (from_id,))
+        from_name = cur.fetchone()["name"]
 
-            cur.execute("INSERT INTO savings (account_id, amount, memo, saved_date) VALUES (?, ?, ?, ?)", (from_id, -amount, memo, now))
-            cur.execute("INSERT INTO savings (account_id, amount, memo, saved_date) VALUES (?, ?, ?, ?)", (to_id, amount, memo, now))
-            conn.commit()
-            message = "振替完了"
-            category = "success"
+        cur.execute("SELECT name FROM accounts WHERE id = ?", (to_id,))
+        to_name = cur.fetchone()["name"]
 
+        memo = f"FROM {from_name} TO {to_name}"
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        # 出金
+        cur.execute("""
+            INSERT INTO savings (account_id, amount, memo, saved_date)
+            VALUES (?, ?, ?, ?)         
+        """, (from_id, -amount, memo, now))
+
+        # 入金
+        cur.execute("""
+            INSERT INTO savings (account_id, amount, memo, saved_date)
+            VALUES (?, ?, ?, ?)         
+        """, (to_id, amount, memo, now))
+
+        conn.commit()
+        conn.close()
+
+        return redirect("/")
+    
     conn.close()
-    return render_template("transfer.html", accounts=accounts, message=message, category=category)
-
+    return render_template("transfer.html", accounts=accounts)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)

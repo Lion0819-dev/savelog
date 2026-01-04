@@ -1,211 +1,134 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>明細</title>
-    <style>
-        /* 全体 */
-        body {
-            font-family: system-ui, -apple-system;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 16px;
-        }
+{% block title %}明細{% endblock %}
 
-        /* タイトル */
-        h1 {
-            text-align: center;
-            margin-bottom: 16px;
-        }
+{% block head_extra %}
+<style>
+    .month-filters button,
+    .account-filters button,
+    .amount-filters button {
+        margin-bottom: 4px;
+    }
+</style>
+{% endblock %}
 
-        /* ===== フィルターエリア ===== */
-        .filters {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
+{% block content %}
+<h1>明細</h1>
 
-        /* フィルターのグループ */
-        .filters>div {
-            margin-bottom: 8px;
-        }
-
-        /* ボタン共通 */
-        .filter-btn {
-            margin: 4px 4px 4px 0;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background: #fff;
-            color: #333;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        /* ON状態（Excelスライサー風） */
-        .filter-btn.active {
-            background: #007aff;
-            color: #fff;
-            border-color: #007aff;
-        }
-
-        /* ===== テーブル ===== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* ヘッダー固定 */
-        thead th {
-            position: sticky;
-            top: 0;
-            background: #eeeeee;
-            z-index: 1;
-        }
-
-        /* セル */
-        th,
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-        }
-
-        /* 金額列右寄せ */
-        td:nth-child(3) {
-            text-align: right;
-        }
-
-        /* マイナス金額 */
-        .negative {
-            color: red;
-            font-weight: bold;
-        }
-
-        /* 行ホバー */
-        tbody tr:hover {
-            background: #f0f8ff;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>明細</h1>
-
-    <div class="filters">
-        <!-- 月フィルター -->
-        <div class="month-filters">
-            {% for m in months %}
-            <button class="filter-btn active" data-month="{{ m }}">
-                {{ m }}
-            </button>
-            {% endfor %}
-        </div>
-
-        <!-- 口座フィルター -->
-        <div class="account-filters">
-            {% for name in account_names %}
-            <button class="filter-btn active" data-account="{{ name }}">
-                {{ name }}
-            </button>
-            {% endfor %}
-        </div>
-
-        <!-- 金額フィルター -->
-        <div class="amount-filters">
-            <button class="filter-btn active" data-amount="plus">収入</button>
-            <button class="filter-btn active" data-amount="minus">支出</button>
-        </div>
+<div class="filters">
+    <!-- 月フィルター -->
+    <div class="month-filters">
+        {% for m in months %}
+        <button class="filter-btn active" data-month="{{ m }}">
+            {{ m }}
+        </button>
+        {% endfor %}
     </div>
 
+    <!-- 口座フィルター -->
+    <div class="account-filters">
+        {% for name in account_names %}
+        <button class="filter-btn active" data-account="{{ name }}">
+            {{ name }}
+        </button>
+        {% endfor %}
+    </div>
 
-    <table border="1" width="100%">
-        <thead>
-            <tr>
-                <th>日付</th>
-                <th>口座</th>
-                <th>金額</th>
-                <th>メモ</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for d in details %}
-            <tr class="detail-row"
-                data-account="{{ d['account_name'] }}" 
-                data-amount="{{ d['amount'] }}"
-                data-month="{{ d['saved_date'][:7] }}">
-                <td>{{ d['saved_date'] }}</td>
-                <td>{{ d['account_name'] }}</td>
-                <td class="{% if d['amount'] < 0 %}negative{% endif %}">
-                    {{ "{:,}".format(d['amount']) }}
-                </td>
-                <td>{{ d['memo'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <!-- 金額フィルター -->
+    <div class="amount-filters">
+        <button class="filter-btn active" data-amount="plus">収入</button>
+        <button class="filter-btn active" data-amount="minus">支出</button>
+    </div>
+</div>
 
-    </table>
 
-    <script>
-        const buttons = document.querySelectorAll(".filter-btn");
+<table border="1" width="100%">
+    <thead>
+        <tr>
+            <th>日付</th>
+            <th>口座</th>
+            <th>金額</th>
+            <th>メモ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in details %}
+        <tr class="detail-row" data-account="{{ d['account_name'] }}" data-amount="{{ d['amount'] }}"
+            data-month="{{ d['saved_date'][:7] }}">
+            <td>{{ d['saved_date'] }}</td>
+            <td>{{ d['account_name'] }}</td>
+            <td class="{% if d['amount'] < 0 %}negative{% endif %}">
+                {{ "{:,}".format(d['amount']) }}
+            </td>
+            <td>{{ d['memo'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 
-        buttons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                btn.classList.toggle("active");
+</table>
 
-                // 全OFF防止（最低1つはON）
-                const group = btn.parentElement;
-                const activeCount = group.querySelectorAll(".active").length;
-                if (activeCount === 0) {
-                    btn.classList.add("active");
-                    return;
-                }
+<script>
+    const buttons = document.querySelectorAll(".filter-btn");
 
-                applyFilters();
-            });
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.classList.toggle("active");
+
+            // 全OFF防止（最低1つはON）
+            const group = btn.parentElement;
+            const activeCount = group.querySelectorAll(".active").length;
+            if (activeCount === 0) {
+                btn.classList.add("active");
+                return;
+            }
+
+            applyFilters();
         });
+    });
 
-        function applyFilters() {
-            const activeAccounts = [...document.querySelectorAll(
-                ".account-filters .active"
-            )].map(b => b.dataset.account);
+    function applyFilters() {
+        const activeAccounts = [...document.querySelectorAll(
+            ".account-filters .active"
+        )].map(b => b.dataset.account);
 
-            const activeMonths = [...document.querySelectorAll(
-                ".month-filters .active"
-            )].map(b => b.dataset.month);
+        const activeMonths = [...document.querySelectorAll(
+            ".month-filters .active"
+        )].map(b => b.dataset.month);
 
-            const activeAmounts = [...document.querySelectorAll(
-                ".amount-filters .active"
-            )].map(b => b.dataset.amount);
+        const activeAmounts = [...document.querySelectorAll(
+            ".amount-filters .active"
+        )].map(b => b.dataset.amount);
 
-            document.querySelectorAll(".detail-row").forEach(row => {
-                const account = row.dataset.account;
-                const month = row.dataset.month;
-                const amount = Number(row.dataset.amount);
+        const seenTransfers = new Set(); //振替重複チェック
 
-                const accountOK = activeAccounts.includes(account);
-                const monthOK = activeMonths.includes(month);
-                const amountOK =
-                    (amount > 0 && activeAmounts.includes("plus")) ||
-                    (amount < 0 && activeAmounts.includes("minus"));
+        document.querySelectorAll(".detail-row").forEach(row => {
+            const account = row.dataset.account;
+            const month = row.dataset.month;
+            const amount = Number(row.dataset.amount);
+            const memo = row.querySelector("td:last-child").textContent;
 
-                row.style.display =
-                    accountOK && monthOK && amountOK ? "" : "none";
-            });
-        }
-    </script>
+            // 振替の1行表示
+            let showRow = true;
+            if (memo.includes("FROM") && memo.includes("TO")) {
+                if (seenTransfers.has(memo)) {
+                    showRow = false; // 2行目は非表示
+                } else {
+                    seenTransfers.add(memo); // 初回だけ表示
+                }
+            }
 
-    `
+            // フィルター条件
+            const accountOK = activeAccounts.includes(account);
+            const monthOK = activeMonths.includes(month);
+            const amountOK =
+                (amount > 0 && activeAmounts.includes("plus")) ||
+                (amount < 0 && activeAmounts.includes("minus"));
 
+            row.style.display = (showRow && accountOK && monthOK && amountOK) ? "" : "none";
+        });
+    }
 
-
-
-</body>
-
-</html>
+    // 初期適用
+    applyFilters();
+</script>
+{% endblock %}
