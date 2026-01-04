@@ -56,9 +56,7 @@
         </thead>
         <tbody>
             {% for d in details %}
-            <tr class="detail-row"
-                data-account="{{ d['account_name'] }}" 
-                data-amount="{{ d['amount'] }}"
+            <tr class="detail-row" data-account="{{ d['account_name'] }}" data-amount="{{ d['amount'] }}"
                 data-month="{{ d['saved_date'][:7] }}">
                 <td>{{ d['saved_date'] }}</td>
                 <td>{{ d['account_name'] }}</td>
@@ -104,21 +102,37 @@
                 ".amount-filters .active"
             )].map(b => b.dataset.amount);
 
+            const seenTransfers = new Set(); //振替重複チェック
+
             document.querySelectorAll(".detail-row").forEach(row => {
                 const account = row.dataset.account;
                 const month = row.dataset.month;
                 const amount = Number(row.dataset.amount);
+                const memo = row.querySelector("td:last-child").textContent;
 
+                // 振替の1行表示
+                let showRow = true;
+                if (memo.includes("FROM") && memo.includes("TO")) {
+                    if (seenTransfers.has(memo)) {
+                        showRow = false; // 2行目は非表示
+                    } else {
+                        seenTransfers.add(memo); // 初回だけ表示
+                    }
+                }
+
+                // フィルター条件
                 const accountOK = activeAccounts.includes(account);
                 const monthOK = activeMonths.includes(month);
                 const amountOK =
                     (amount > 0 && activeAmounts.includes("plus")) ||
                     (amount < 0 && activeAmounts.includes("minus"));
 
-                row.style.display =
-                    accountOK && monthOK && amountOK ? "" : "none";
+                row.style.display = (showRow && accountOK && monthOK && amountOK) ? "" : "none";
             });
         }
+
+        // 初期適用
+        applyFilters();
     </script>
 
     `

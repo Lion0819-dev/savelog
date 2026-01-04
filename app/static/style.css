@@ -25,10 +25,15 @@ h1 {
 }
 
 .filters > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
 .filter-btn {
+  width: auto;
+  flex: 0 0 auto;
   margin: 4px 4px 4px 0;
   padding: 6px 12px;
   border-radius: 6px;
